@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Live Battle Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body {
+            background: #0f172a;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .glass {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between p-6 select-none">
+
+    <div class="flex justify-between items-center w-full max-w-5xl mx-auto">
+        <div class="glass px-5 py-3 rounded-2xl text-white font-bold text-lg shadow-lg border-l-4 border-blue-500">
+            🔵 Mavi (Gül 🌹)
+        </div>
+        <div id="latest-gift" class="glass px-5 py-2 rounded-xl text-yellow-400 font-semibold text-base animate-pulse text-center">
+            Oyun başladı! Hədiyyə atın! 🚀
+        </div>
+        <div class="glass px-5 py-3 rounded-2xl text-white font-bold text-lg shadow-lg border-r-4 border-rose-500 text-right">
+            🔴 Qırmızı (Digərləri 🔥)
+        </div>
+    </div>
+
+    <div class="w-full max-w-5xl mx-auto flex flex-col items-center my-auto">
+        <div class="w-full flex justify-between text-3xl font-black text-white mb-4 px-2">
+            <span id="left-score" class="text-blue-400">0</span>
+            <span class="text-gray-500 text-xl uppercase tracking-widest">VS</span>
+            <span id="right-score" class="text-rose-400">0</span>
+        </div>
+        
+        <div class="w-full h-10 bg-gray-900/90 rounded-full p-1.5 flex overflow-hidden shadow-2xl border border-gray-700">
+            <div id="left-bar" class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 rounded-l-full transition-all duration-300" style="width: 50%;"></div>
+            <div id="right-bar" class="h-full bg-gradient-to-l from-rose-600 to-orange-400 rounded-r-full transition-all duration-300" style="width: 50%;"></div>
+        </div>
+    </div>
+
+    <div class="text-center pb-4">
+        <p id="event-log" class="text-white/60 text-sm tracking-wide">İzləyicilər hədiyyə atdıqca xallar avtomatik yenilənir...</p>
+    </div>
+
+    <script>
+        const socket = io();
+
+        socket.on('update_game', function(data) {
+            let left = data.left_score;
+            let right = data.right_score;
+            
+            document.getElementById('left-score').innerText = left;
+            document.getElementById('right-score').innerText = right;
+
+            let total = left + right;
+            let leftPercent = 50;
+            let rightPercent = 50;
+
+            if (total > 0) {
+                leftPercent = (left / total) * 100;
+                rightPercent = (right / total) * 100;
+            }
+
+            document.getElementById('left-bar').style.width = leftPercent + '%';
+            document.getElementById('right-bar').style.width = rightPercent + '%';
+
+            document.getElementById('latest-gift').innerText = `🎁 @${data.user} -> ${data.gift} (${data.count}x)!`;
+            document.getElementById('event-log').innerText = `Son dəstək: @${data.user} komandaya güc qatdı!`;
+        });
+    </script>
+</body>
+</html>
